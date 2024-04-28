@@ -57,7 +57,7 @@ const SignIn = () => {
           disabled={loading}
           className="bg-slate-700 text-white p-3 rounded-lg uppercase hover:opacity-95 disabled:opacity-80 disabled:cursor-not-allowed"
         >
-          {loading ? "Loading" : "Sign Up"}
+          {loading ? "Loading" : "Sign In"}
         </button>
       </form>
       <div className=" mt-5">
