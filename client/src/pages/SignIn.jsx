@@ -1,11 +1,15 @@
 import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
+import { signFailure, signStart, signSuccess } from "../redux/user/userSlice";
 
 const SignIn = () => {
   const [formData, setFormData] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
+  // const [loading, setLoading] = useState(false);
+  // const [error, setError] = useState(false);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { loading, error } = useSelector((state) => state.user);
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
@@ -13,8 +17,9 @@ const SignIn = () => {
     e.preventDefault();
     console.log(formData);
     try {
-      setLoading(true);
-      setError(false);
+      // setLoading(true);
+      // setError(false);
+      dispatch(signStart());
       const res = await fetch("/api/auth/signIn", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -22,16 +27,20 @@ const SignIn = () => {
       });
       const data = await res.json();
       console.log(data);
+
+      if (data.success === false) {
+        // setError(true);
+        dispatch(signFailure(data.error));
+      }
       if (res.ok) {
+        dispatch(signSuccess(data));
         navigate("/");
       }
-      if (data.success === false) {
-        setError(true);
-      }
-      setLoading(false);
+      // setLoading(false);
     } catch (error) {
-      setError(true);
-      setLoading(false);
+      // setError(true);
+      // setLoading(false);
+      dispatch(signFailure(error));
     }
   };
   return (
@@ -68,7 +77,11 @@ const SignIn = () => {
           </Link>
         </p>
       </div>
-      {error && <p className="text-red-500 mt-2">Something went wrong</p>}
+      {error && (
+        <p className="text-red-500 mt-2">
+          {error ? error : "Something went wrong"}
+        </p>
+      )}
     </div>
   );
 };
