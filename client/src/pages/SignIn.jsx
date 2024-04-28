@@ -30,6 +30,7 @@ const SignIn = () => {
       if (data.success === false) {
         // setError(data);
         dispatch(signFailure(data.message));
+        return;
       }
       if (res.ok) {
         navigate("/");
