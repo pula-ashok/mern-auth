@@ -84,6 +84,7 @@ export const google = async (req, res, next) => {
         username: usernamegenerate,
         email,
         password: hashedPassword,
+        photo: photo,
       });
       await newUser.save();
       const { password, ...rest } = newUser._doc;
