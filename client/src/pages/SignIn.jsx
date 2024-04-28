@@ -2,20 +2,20 @@ import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { signFailure, signStart, signSuccess } from "../redux/user/userSlice";
+import OAuth from "../components/OAuth";
 
 const SignIn = () => {
   const [formData, setFormData] = useState([]);
   // const [loading, setLoading] = useState(false);
   // const [error, setError] = useState(false);
-  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { loading, error } = useSelector((state) => state.user);
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData);
     try {
       // setLoading(true);
       // setError(false);
@@ -26,19 +26,18 @@ const SignIn = () => {
         body: JSON.stringify(formData),
       });
       const data = await res.json();
-      console.log(data);
 
       if (data.success === false) {
-        // setError(true);
-        dispatch(signFailure(data.error));
+        // setError(data);
+        dispatch(signFailure(data.message));
       }
       if (res.ok) {
-        dispatch(signSuccess(data));
         navigate("/");
+        dispatch(signSuccess(data));
       }
       // setLoading(false);
     } catch (error) {
-      // setError(true);
+      // setError(error);
       // setLoading(false);
       dispatch(signFailure(error));
     }
@@ -68,6 +67,7 @@ const SignIn = () => {
         >
           {loading ? "Loading" : "Sign In"}
         </button>
+        <OAuth />
       </form>
       <div className=" mt-5">
         <p className="flex gap-2">

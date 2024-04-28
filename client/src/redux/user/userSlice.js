@@ -20,7 +20,6 @@ const userSlice = createSlice({
       state.error = false;
     },
     signFailure: (state, action) => {
-      console.log(action);
       state.loading = false;
       state.error = action.payload;
       state.user = null;

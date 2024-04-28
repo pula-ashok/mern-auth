@@ -6,9 +6,20 @@ import { errorHandler } from "./../utils/error.js";
 
 export const signup = async (req, res, next) => {
   const { username, email, password } = req.body;
-  const hashedPassword = bcryptjs.hashSync(password, 10);
 
   try {
+    if (
+      !email ||
+      !password ||
+      !username ||
+      username === "" ||
+      email === "" ||
+      password === ""
+    ) {
+      return next(errorHandler(400, "All fields are required"));
+    }
+    const hashedPassword = bcryptjs.hashSync(password, 10);
+
     const findUser = await User.findOne({ username });
     const findUser1 = await User.findOne({ email });
     if (findUser || findUser1) {
@@ -44,6 +55,40 @@ export const signin = async (req, res, next) => {
       .cookie("access_token", token, { httpOnly: true, expires: expiryDate })
       .status(200)
       .json(rest);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const google = async (req, res, next) => {
+  const { username, email, photo } = req.body;
+  try {
+    const userFound = await User.findOne({ email });
+    if (userFound) {
+      const token = jwt.sign({ id: userFound._id }, process.env.JWT_SECRET);
+      const expiryData = new Date(Date.now() + 3600000);
+      const { password: hashedPassword, ...rest } = userFound._doc;
+      res
+        .cookie("access_token", token, {
+          httpOnly: true,
+          expires: expiryData,
+        })
+        .status(200)
+        .json(rest);
+    } else {
+      const usernamegenerate =
+        username.split(" ").join("") + Math.floor(Math.random() * 10000);
+      const generagedPassword = Math.random().toString(36).slice(-8);
+      const hashedPassword = bcryptjs.hashSync(generagedPassword, 10);
+      const newUser = new User({
+        username: usernamegenerate,
+        email,
+        password: hashedPassword,
+      });
+      await newUser.save();
+      const { password, ...rest } = newUser._doc;
+      return res.status(201).json(rest);
+    }
   } catch (error) {
     next(error);
   }

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import OAuth from "../components/OAuth";
 
 const SignUp = () => {
   const [formData, setFormData] = useState([]);
@@ -11,7 +12,6 @@ const SignUp = () => {
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData);
     try {
       setLoading(true);
       setError(false);
@@ -21,16 +21,15 @@ const SignUp = () => {
         body: JSON.stringify(formData),
       });
       const data = await res.json();
-      console.log(data);
       if (res.ok) {
         navigate("/sign-in");
       }
       if (data.success === false) {
-        setError(true);
+        setError(data);
       }
       setLoading(false);
     } catch (error) {
-      setError(true);
+      setError(error);
       setLoading(false);
     }
   };
@@ -66,6 +65,7 @@ const SignUp = () => {
         >
           {loading ? "Loading" : "Sign Up"}
         </button>
+        <OAuth />
       </form>
       <div className=" mt-5">
         <p className="flex gap-2">
@@ -77,7 +77,7 @@ const SignUp = () => {
       </div>
       {error && (
         <p className="text-red-500 mt-2">
-          {error ? error : "Something went wrong"}
+          {error ? error.message : "Something went wrong"}
         </p>
       )}
     </div>
