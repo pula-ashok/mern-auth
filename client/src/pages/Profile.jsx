@@ -9,6 +9,10 @@ import {
 } from "firebase/storage";
 import { app } from "../../firebase";
 import {
+  deleteUserFailure,
+  deleteUserStart,
+  deleteUserSuccess,
+  signOut,
   updateUserFailure,
   updateUserStart,
   updateUserSuccess,
@@ -39,7 +43,7 @@ const Profile = () => {
       (snapshot) => {
         const progress =
           (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        console.log("upload is " + progress + "% done");
+        // console.log("upload is " + progress + "% done");
         setImagePercent(Math.round(progress));
       },
       (error) => {
@@ -69,16 +73,16 @@ const Profile = () => {
         body: JSON.stringify(formData),
       });
       const data = await res.json();
-      console.log("data", data);
+      // console.log("data", data);
 
       if (data.success === false) {
         // setError(data);
         dispatch(updateUserFailure(data.message));
         return;
       } else {
-        console.log("ashok pula");
+        // console.log("ashok pula");
         // navigate("/profile");
-        console.log(data);
+        // console.log(data);
         dispatch(updateUserSuccess(data));
         setSuccessFlag(true);
       }
@@ -87,6 +91,28 @@ const Profile = () => {
       // setError(error);
       // setLoading(false);
       dispatch(updateUserFailure(error.message));
+    }
+  };
+  const deleteHandler = async () => {
+    try {
+      dispatch(deleteUserStart());
+      const res = await fetch(`/api/user/delete/${user._id}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = await res.json();
+      dispatch(deleteUserSuccess());
+      // console.log(data);
+    } catch (error) {
+      dispatch(deleteUserFailure(error.message));
+    }
+  };
+  const singoutHandler = async () => {
+    try {
+      await fetch("/api/auth/signout");
+      dispatch(signOut());
+    } catch (error) {
+      console.log(error);
     }
   };
   return (
@@ -150,8 +176,12 @@ const Profile = () => {
         </button>
       </form>
       <div className="flex justify-between mt-5">
-        <span className="text-red-700 cursor-pointer">Delete Account</span>
-        <span className="text-red-700 cursor-pointer">Sign Out</span>
+        <span className="text-red-700 cursor-pointer" onClick={deleteHandler}>
+          Delete Account
+        </span>
+        <span className="text-red-700 cursor-pointer" onClick={singoutHandler}>
+          Sign Out
+        </span>
       </div>
       <p className="text-sm mt-4">
         {error ? (
